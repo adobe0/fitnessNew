@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.sp
 fun LandingPage() {
     Column {
         Text(
-            text = "Fuck you vansh",
+            text = "hello",
             fontSize = 100.sp
         )
     }
