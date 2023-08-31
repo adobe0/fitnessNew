@@ -112,7 +112,7 @@ fun RecipePreviewCard(
 @Composable
 fun RecipeCardSample() {
 
-       /* RecipeDetailScreen(
+       RecipeDetailScreen(
             imageUrl = R.drawable.sample_card,  // A hypothetical image resource ID
             title = "Mouth-Watering Spaghetti",
             icons = listOf(
@@ -134,7 +134,7 @@ fun RecipeCardSample() {
                     "2. In a pan, sauté garlic in olive oil until fragrant.\n" +
                     "3. Add the tomato sauce and let it simmer for 10 minutes.\n" +
                     "4. Toss in the cooked spaghetti and mix well.\n" +
-                    "5. Serve hot, garnished with fresh basil and parmesan.")*/
+                    "5. Serve hot, garnished with fresh basil and parmesan.")
 
 
 
