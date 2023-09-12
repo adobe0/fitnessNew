@@ -46,13 +46,15 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.getValue
+import org.mindrot.jbcrypt.BCrypt
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         FirebaseApp.initializeApp(this)
         super.onCreate(savedInstanceState)
-        ViewModelProvider(this).get(SharedViewModel::class.java)
+        ViewModelProvider(this)[SharedViewModel::class.java]
         setContent {
             FitnessTrackerTheme {
                 // A surface container using the 'background' color from the theme
@@ -69,24 +71,15 @@ class MainActivity : ComponentActivity() {
 }
 
 val databaseRef = FirebaseDatabase.getInstance().reference
-val testDat = databaseRef.child("userInfo/User 2/Name")
 var userName: String? = null
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailPage() {
-    testDat.addListenerForSingleValueEvent(object : ValueEventListener{
-        override fun onDataChange(snapshot: DataSnapshot) {
-            userName = snapshot.getValue(String::class.java)
-        }
-
-        override fun onCancelled(error: DatabaseError) {
-            println("Database error")
-        }
-    })
     println(userName)
     var UserEmailIn by remember { mutableStateOf("") }
     var buttonText by remember { mutableStateOf("") }
+    var UserPasswordIn by remember { mutableStateOf("") }
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.LightGray)) {
@@ -127,11 +120,63 @@ fun EmailPage() {
                     .background(Color.White)
             )
             Text(text = buttonText, color = Color.Red)
-            Spacer(modifier = Modifier.height(70
 
-                .dp))
+            Text(
+                text = "Password:",
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 2.dp)
+            )
+            // Display the password input field
+            TextField(
+                value = UserPasswordIn,
+                onValueChange = { UserPasswordIn = it },
+                placeholder = { Text("Enter Password") },
+                singleLine = true,
+                colors = TextFieldDefaults.textFieldColors(
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier
+                    .width(250.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .shadow(3.dp, RoundedCornerShape(10.dp))
+                    .background(Color.White)
+            )
+            // Display the button's text
+            Text(text = buttonText, color = Color.Red)
+
+            // Add some space before the button
+            Spacer(modifier = Modifier.height(70.dp))
             Button(
-                onClick = { buttonText = if (UserEmailIn == userName ) "correct email" else "check email ID!"},
+                onClick = {
+                    databaseRef.child("users").child(UserEmailIn).addListenerForSingleValueEvent(object: ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.exists()) {
+                                // Username
+                                val userDetail = snapshot.getValue<Map<String, Any>>()
+                                val storedHashedPassword = userDetail?.get("password") as? String
+
+                                if (storedHashedPassword != null && BCrypt.checkpw(UserPasswordIn, storedHashedPassword)) {
+                                    // Passwords match
+                                    buttonText = "Login successful!"
+                                } else {
+                                    // Passwords do not match
+                                    buttonText = "Incorrect password!"
+                                }
+                            } else {
+                                // Username not in  database
+                                buttonText = "Username not found!"
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            // Handle any errors
+                            buttonText = "Error during login. Try again."
+                        }
+                    })
+                },
                 colors = ButtonDefaults.buttonColors(Color(192,219,36))
             ) {
                 Text(text = "Submit!")
