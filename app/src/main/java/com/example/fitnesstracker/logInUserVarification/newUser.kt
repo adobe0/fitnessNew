@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitnesstracker.R
 import com.google.firebase.database.FirebaseDatabase
+import org.mindrot.jbcrypt.BCrypt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -182,11 +183,12 @@ fun SignUpPage() {
             Button(
                 onClick = {
                     if (userPasswordIn == userConfirmPasswordIn) {
+                        val secPassword = BCrypt.hashpw(userPasswordIn, BCrypt.gensalt())
                         // Saving data to Firebase
 
                         val userDetail = hashMapOf(
                             "email" to userEmailIn,
-                            "password" to userPasswordIn
+                            "password" to secPassword
                         )
 
                         val database = FirebaseDatabase.getInstance()
