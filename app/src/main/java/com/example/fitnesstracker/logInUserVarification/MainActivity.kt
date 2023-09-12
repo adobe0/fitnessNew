@@ -1,5 +1,6 @@
 package com.example.fitnesstracker.logInUserVarification
 
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,10 +41,16 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.fitnesstracker.R
 import com.example.fitnesstracker.SharedViewModel
 import com.example.fitnesstracker.ui.theme.FitnessTrackerTheme
+import com.google.firebase.FirebaseApp
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        FirebaseApp.initializeApp(this)
         super.onCreate(savedInstanceState)
         ViewModelProvider(this).get(SharedViewModel::class.java)
         setContent {
@@ -53,6 +60,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    EmailPage()
 
                 }
             }
@@ -60,9 +68,23 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+val databaseRef = FirebaseDatabase.getInstance().reference
+val testDat = databaseRef.child("userInfo/User 2/Name")
+var userName: String? = null
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailPage() {
+    testDat.addListenerForSingleValueEvent(object : ValueEventListener{
+        override fun onDataChange(snapshot: DataSnapshot) {
+            userName = snapshot.getValue(String::class.java)
+        }
+
+        override fun onCancelled(error: DatabaseError) {
+            println("Database error")
+        }
+    })
+    println(userName)
     var UserEmailIn by remember { mutableStateOf("") }
     var buttonText by remember { mutableStateOf("") }
     Box(modifier = Modifier
@@ -109,7 +131,7 @@ fun EmailPage() {
 
                 .dp))
             Button(
-                onClick = { buttonText = if (UserEmailIn == "Aadit" ) "correct email" else "check email ID!"},
+                onClick = { buttonText = if (UserEmailIn == userName ) "correct email" else "check email ID!"},
                 colors = ButtonDefaults.buttonColors(Color(192,219,36))
             ) {
                 Text(text = "Submit!")

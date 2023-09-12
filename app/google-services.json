@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "349359886513",
+    "firebase_url": "https://fitness-food-thing-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "fitness-food-thing",
+    "storage_bucket": "fitness-food-thing.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:349359886513:android:ecd66eb0d53dfb8d20d290",
+        "android_client_info": {
+          "package_name": "com.example.fitnesstracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "349359886513-g70elbqutlu9g154f8khhcq45ghsame9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsWH79O5TTzcDrNsLKeNuMmqUJZv7YMuY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "349359886513-g70elbqutlu9g154f8khhcq45ghsame9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

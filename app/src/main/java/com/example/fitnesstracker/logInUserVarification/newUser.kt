@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitnesstracker.R
+import com.google.firebase.database.FirebaseDatabase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +47,7 @@ fun SignUpPage() {
     var userPasswordIn by remember { mutableStateOf("") }
     var userConfirmPasswordIn by remember { mutableStateOf("") }
     var buttonText by remember { mutableStateOf("") }
-
+    val UserEnter = databaseRef.child("users")
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.LightGray)) {
@@ -180,10 +181,24 @@ fun SignUpPage() {
 
             Button(
                 onClick = {
-                    // Here you can add validation logic
-                    // For example, check if passwords match
                     if (userPasswordIn == userConfirmPasswordIn) {
-                        buttonText = "Signed Up Successfully!"
+                        // Saving data to Firebase
+
+                        val userDetail = hashMapOf(
+                            "email" to userEmailIn,
+                            "password" to userPasswordIn
+                        )
+
+                        val database = FirebaseDatabase.getInstance()
+                        val userReference = UserEnter.child(userNameIn)
+
+                        userReference.setValue(userDetail)
+                            .addOnSuccessListener {
+                                buttonText = "Successfully registered!"
+                            }
+                            .addOnFailureListener {
+                                buttonText = "Registration failed. Please try again."
+                            }
                     } else {
                         buttonText = "Passwords do not match!"
                     }
@@ -198,7 +213,7 @@ fun SignUpPage() {
 
 
 @Preview(showSystemUi = true)
-@Composable()
+@Composable
 fun Preview(){
     SignUpPage()
 }

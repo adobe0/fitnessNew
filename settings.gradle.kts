@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "fitness tracker"
 include(":app")
- 
+include(":new user")
