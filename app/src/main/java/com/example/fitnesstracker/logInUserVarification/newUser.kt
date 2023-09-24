@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitnesstracker.R
+import com.example.fitnesstracker.ui.theme.olive
 import com.google.firebase.database.FirebaseDatabase
 import org.mindrot.jbcrypt.BCrypt
 
@@ -205,7 +206,7 @@ fun SignUpPage() {
                         buttonText = "Passwords do not match!"
                     }
                 },
-                colors = ButtonDefaults.buttonColors(Color(192,219,36))
+                colors = ButtonDefaults.buttonColors(olive)
             ) {
                 Text(text = "Sign Up!")
             }
