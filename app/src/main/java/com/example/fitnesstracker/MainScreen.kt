@@ -1,4 +1,4 @@
-package com.example.fitnesstracker
+/*package com.example.fitnesstracker
 
 
 import androidx.compose.foundation.clickable
@@ -29,7 +29,7 @@ fun MainScreen() {
         drawerState = drawerState
     ) {
         NavHost(navController = navController, startDestination = MainDestinations.Landing_Page) {
-            composable(MainDestinations.Landing_Page) { LandingPage() }
+            composable(MainDestinations.Landing_Page) { LandPage() }
             composable(MainDestinations.explore_Page) { ExplorePage() }
             composable(MainDestinations.myFood_Page) { MyFoodPage() }
             composable(MainDestinations.myPlan_Page) { MyPlanPage() }
@@ -60,4 +60,4 @@ fun Drawer(navController: NavController) {
 @Composable
 fun DrawerItem(title: String, onClick: () -> Unit) {
     Text(text = title, modifier = Modifier.clickable(onClick = onClick).padding(16.dp))
-}
+}*/

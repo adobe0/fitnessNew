@@ -12,19 +12,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.fitnesstracker.R
 import com.example.fitnesstracker.assets.RecipePreviewCard
+import com.example.fitnesstracker.screen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LandPage() {
+fun LandPage(navController: NavController) {
     Column {
         Spacer(modifier = Modifier.height(5.dp))
         Button(
             onClick = {
-                // Define the action to be taken when the button is clicked
-                //navigate to another screen or perform some action.
+                navController.navigate(route = screen.explore.route)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -55,8 +56,3 @@ fun LandPage() {
 
 }}
 
-@Preview(showSystemUi = true)
-@Composable
-fun look(){
-    LandPage()
-}

@@ -1,4 +1,4 @@
-package com.example.fitnesstracker.assets
+/*package com.example.fitnesstracker.assets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -81,3 +81,4 @@ fun DrawerButton(
             .padding(16.dp)
     )
 }
+*/
