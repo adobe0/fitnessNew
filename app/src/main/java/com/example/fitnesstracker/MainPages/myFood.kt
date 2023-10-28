@@ -34,9 +34,10 @@ import com.google.firebase.ktx.Firebase
 fun MyFoodPage(navController: NavController) {
     var ingredientText by remember { mutableStateOf("") }
     var ingredientsList by remember { mutableStateOf(listOf<String>()) }
-
     val database = Firebase.database
-    val ingredientsRef = database.getReference("ingredients")
+
+
+    val ingredientsRef = database.getReference("users/aadit/ingredients")
 
     // Fetch data from Firebase and listen for changes
     ingredientsRef.addValueEventListener(object : ValueEventListener {
@@ -67,11 +68,14 @@ fun MyFoodPage(navController: NavController) {
 
             Text(
                 text = "My Food",
-                modifier = Modifier.align(Alignment.CenterVertically).padding(start = 110.dp),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(start = 110.dp),
                 textAlign = TextAlign.Center,
                 fontSize = 24.sp
             )
         }
+
 
         Divider(
             color = Color.Gray,
@@ -79,6 +83,7 @@ fun MyFoodPage(navController: NavController) {
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
         )
+        //TextField(value = currUser, onValueChange = {currUser = it})
 
         LazyColumn(modifier = Modifier.weight(1f)) {
             itemsIndexed(ingredientsList) { index, ingredient ->
