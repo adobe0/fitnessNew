@@ -2,6 +2,7 @@ package com.example.fitnesstracker.logInUserVarification
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +32,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.fitnesstracker.R
+import com.example.fitnesstracker.screen
 import com.example.fitnesstracker.ui.theme.FitnessTrackerTheme
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -45,7 +49,7 @@ var userName: String? = null
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmailPage() {
+fun EmailPage(navController: NavHostController,) {
     println(userName)
     var UserEmailIn by remember { mutableStateOf("") }
     var buttonText by remember { mutableStateOf("") }
@@ -89,6 +93,9 @@ fun EmailPage() {
                     .shadow(3.dp, RoundedCornerShape(10.dp))
                     .background(Color.White)
             )
+            Text(text = "New user", color = Color.Gray, modifier = Modifier.clickable{
+                navController.navigate(route = screen.newUser.route)
+            })
             Text(text = buttonText, color = Color.Red)
 
             Text(
@@ -115,6 +122,9 @@ fun EmailPage() {
                     .background(Color.White)
             )
             // Display the button's text
+            Text(text = "Forgot Password", color = Color.Gray, modifier = Modifier.clickable{
+                navController.navigate(route = screen.forgotPass1.route)
+            })
             Text(text = buttonText, color = Color.Red)
 
             // Add some space before the button
@@ -130,7 +140,7 @@ fun EmailPage() {
 
                                 if (storedHashedPassword != null && BCrypt.checkpw(UserPasswordIn, storedHashedPassword)) {
                                     // Passwords match
-                                    buttonText = "Login successful!"
+                                    navController.navigate(route = screen.landingPage.route)
                                 } else {
                                     // Passwords do not match
                                     buttonText = "Incorrect password!"
@@ -159,7 +169,7 @@ fun EmailPage() {
 @Composable
 fun GreetingPreview() {
     FitnessTrackerTheme {
-        EmailPage()
+        EmailPage(navController = rememberNavController())
     }
 }
 

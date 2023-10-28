@@ -1,13 +1,7 @@
 package com.example.fitnesstracker.MainPages
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -15,33 +9,46 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fitnesstracker.R
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.fitnesstracker.screen
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyFoodPage() {
+fun MyFoodPage(navController: NavController) {
     var ingredientText by remember { mutableStateOf("") }
     var ingredientsList by remember { mutableStateOf(listOf<String>()) }
+
+    val database = Firebase.database
+    val ingredientsRef = database.getReference("ingredients")
+
+    // Fetch data from Firebase and listen for changes
+    ingredientsRef.addValueEventListener(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val updatedList = dataSnapshot.children.mapNotNull { it.getValue(String::class.java) }
+            ingredientsList = updatedList
+        }
+
+        override fun onCancelled(error: DatabaseError) {
+            // Handle error if needed
+        }
+    })
 
     Column(
         modifier = Modifier
@@ -52,11 +59,11 @@ fun MyFoodPage() {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.noun_hamburger_menu_clicked_4252769),
-                contentDescription = "Menu Icon",
-                modifier = Modifier.size(24.dp).clickable { }
-            )
+            IconButton(onClick = {
+                navController.navigate(route = screen.menue.route)
+            }) {
+                Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+            }
 
             Text(
                 text = "My Food",
@@ -73,7 +80,6 @@ fun MyFoodPage() {
                 .padding(vertical = 4.dp)
         )
 
-        // Display the list of submitted texts here
         LazyColumn(modifier = Modifier.weight(1f)) {
             itemsIndexed(ingredientsList) { index, ingredient ->
                 Row(
@@ -82,13 +88,22 @@ fun MyFoodPage() {
                         .background(Color.LightGray, CircleShape)
                         .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically  // Centering items vertically
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = ingredient, modifier = Modifier.weight(1f))  // Giving text as much space as possible
+                    Text(text = ingredient, modifier = Modifier.weight(1f))
                     IconButton(onClick = {
-                        ingredientsList = ingredientsList.toMutableList().apply {
-                            removeAt(index)
-                        }
+                        val ingredientToDelete = ingredientsList[index]
+                        ingredientsRef.orderByValue().equalTo(ingredientToDelete).addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                dataSnapshot.children.firstOrNull()?.key?.let { key ->
+                                    ingredientsRef.child(key).removeValue()
+                                }
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                // Handle error if needed
+                            }
+                        })
                     }) {
                         Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete")
                     }
@@ -104,16 +119,17 @@ fun MyFoodPage() {
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    ingredientsList = ingredientsList + ingredientText // Add the ingredient to the list
-                    ingredientText = "" // Clear the TextField
+                    ingredientsRef.push().setValue(ingredientText)
+                    ingredientText = ""
                 }
             )
         )
     }
 }
 
+
 @Preview(showSystemUi = true)
 @Composable
 fun showMyFood() {
-    MyFoodPage()
+    MyFoodPage(navController = rememberNavController())
 }

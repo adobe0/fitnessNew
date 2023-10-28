@@ -164,8 +164,8 @@ fun SignUpPage() {
                 onValueChange = { userConfirmPasswordIn = it },
                 placeholder = { Text("Re-enter Password") },
                 singleLine = true,
-                visualTransformation = PasswordVisualTransformation(), // This masks the password as dots
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), // This will show a password-style keyboard
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), 
                 colors = TextFieldDefaults.textFieldColors(
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent
