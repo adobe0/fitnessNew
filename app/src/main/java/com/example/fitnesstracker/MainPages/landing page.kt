@@ -12,6 +12,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,17 +24,38 @@ import androidx.navigation.compose.rememberNavController
 import com.example.fitnesstracker.R
 import com.example.fitnesstracker.assets.RecipePreviewCard
 import com.example.fitnesstracker.screen
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 
 data class Recipe(
     val imageUrl: Int,
     val title: String,
     val description: String,
-    val icons: List<Int>
+    val icons: List<Int>,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandPage(navController: NavController) {
+    val recipes = remember { mutableStateOf<List<Recipe>>(emptyList()) }
+
+    // Fetch recipes from Firebase on launch
+    LaunchedEffect(Unit) {
+        val database = Firebase.database.reference
+        database.child("recipe").get().addOnSuccessListener { dataSnapshot ->
+            val fetchedRecipes = dataSnapshot.children.mapNotNull { snapshot ->
+                val description = snapshot.child("description").getValue(String::class.java)
+                val name = snapshot.child("name").getValue(String::class.java)
+                val imageUrl = R.drawable.sample_card // Placeholder image
+                val icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298) // Placeholder icons
+                if (description != null && name != null) {
+                    Recipe(imageUrl, name, description, icons)
+                } else null
+            }
+            recipes.value = fetchedRecipes.shuffled().take(5) // Randomly select 5 recipes
+        }
+    }
+
     Column {
         Row() {
             IconButton(onClick = {
@@ -41,13 +65,12 @@ fun LandPage(navController: NavController) {
             }
             Spacer(modifier = Modifier.width(340.dp))
             Icon(painter = painterResource(id = R.drawable.airbus_logo_2001), contentDescription ="null", modifier = Modifier.size(30.dp))
-
         }
         Divider()
         Spacer(modifier = Modifier.height(5.dp))
         Button(
             onClick = {
-                navController.navigate(route = screen.explore.route)
+                navController.navigate(route = screen.myFood.route)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -56,51 +79,17 @@ fun LandPage(navController: NavController) {
             Text(text = "Add food")
         }
 
-        Text(text = "Reccomended:", Modifier.padding(start = 5.dp))
+        Text(text = "Recommended:", Modifier.padding(start = 5.dp))
 
         LazyRow {
-            // Sample list of recipes for demonstration purposes
-            val recipes = listOf(
-                Recipe(
-                    imageUrl = R.drawable.sample_card,
-                    title = "Delicious Pasta",
-                    description = "...",
-                    icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298),
-                ),
-                Recipe(
-                    imageUrl = R.drawable.sample_card,
-                    title = "Tasty Soup",
-                    description = "...",
-                    icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298)
-                ),
-                Recipe(
-                    imageUrl = R.drawable.sample_card,
-                    title = "Healthy Salad",
-                    description = "...",
-                    icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298)
-                ),
-                Recipe(
-                    imageUrl = R.drawable.sample_card,
-                    title = "Yummy Pizza",
-                    description = "...",
-                    icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298)
-                ),
-                Recipe(
-                    imageUrl = R.drawable.sample_card,
-                    title = "Amazing Dessert",
-                    description = "...",
-                    icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298)
-                )
-            )
-
-            items(recipes) { recipe ->
+            items(recipes.value) { recipe ->
                 RecipePreviewCard(
                     imageUrl = recipe.imageUrl,
                     title = recipe.title,
                     description = recipe.description,
                     icons = recipe.icons,
-                    onCardClick = {
-                    }
+                    onCardClick = {},
+                    ingridients = listOf("h", "hello00")
                 )
             }
         }
@@ -111,7 +100,8 @@ fun LandPage(navController: NavController) {
             title = "UnDelicious Pasta",
             description = "...",
             icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298),
-            onCardClick = {}
+            onCardClick = {},
+            ingridients = listOf("hi", "hello")
         )
     }
 }
@@ -121,3 +111,4 @@ fun LandPage(navController: NavController) {
 fun PreviewLandPage() {
     LandPage(navController = rememberNavController()) // mock NavController for preview
 }
+

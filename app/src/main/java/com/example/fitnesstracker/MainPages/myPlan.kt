@@ -92,7 +92,8 @@ fun MyPlanPage(navController: NavController) {
             imageUrl = R.drawable.orange_fruits,
             title = "food ex",
             description = "food is very yum",
-            icons = listOf(R.drawable.noun_stopwatch_5062298)
+            icons = listOf(R.drawable.noun_stopwatch_5062298),
+            ingridients = listOf(" ", " "),
         ) { }
 
         Spacer(modifier = Modifier.size(30.dp))

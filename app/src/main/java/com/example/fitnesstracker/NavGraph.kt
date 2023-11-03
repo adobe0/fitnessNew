@@ -1,5 +1,6 @@
 package com.example.fitnesstracker
 
+import AddRecipe
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -63,6 +64,11 @@ fun SetupNavGraph(navController: NavHostController){
             route = screen.menue.route){
             menuSwitching(navController)
         }
+        composable(
+            route = screen.addRecipie.route){
+            AddRecipe(navController)
+        }
+
 
     }
 }

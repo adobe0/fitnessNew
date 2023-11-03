@@ -82,7 +82,7 @@ fun SignUpPage() {
 
             Spacer(modifier = Modifier.height(30.dp)) // Spacing between the quote and the fields
             Text(
-                text = "Name:",
+                text = "Username:",
                 fontSize = 14.sp,
                 modifier = Modifier
                     .align(Alignment.Start)

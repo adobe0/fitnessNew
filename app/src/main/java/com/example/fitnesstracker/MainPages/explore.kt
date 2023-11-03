@@ -1,25 +1,9 @@
 package com.example.fitnesstracker.MainPages
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +21,9 @@ import com.example.fitnesstracker.screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExplorePage(navController: NavController) {
+    var searchQuery by remember { mutableStateOf("") }
+    var searchInitiated by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,11 +60,15 @@ fun ExplorePage(navController: NavController) {
         var textFieldValue2 by remember { mutableStateOf("") }
 
         TextField(
-            value = textFieldValue1,
-            onValueChange = { textFieldValue1 = it },
+            value = searchQuery,
+            onValueChange = {
+                searchQuery = it
+                searchInitiated = it.isNotBlank() // Search is initiated when the query is not blank
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
+                .padding(vertical = 4.dp),
+            placeholder = { Text("Search for recipes") }
         )
 
         Row(
@@ -93,16 +84,17 @@ fun ExplorePage(navController: NavController) {
                     .padding(end = 4.dp)
             )
 
-            Button(onClick = { /* Handle button click here */ }) {
+            Button(onClick = { navController.navigate(screen.addRecipie.route) }) {
                 Text("Add Recipe")
             }
         }
 
         RecipePreviewCard(
             imageUrl = R.drawable.orange_fruits,
-            title = "Recipe Title 1",
-            description = "This is a description for Recipe 1.",
+            title = "Tasty Pasta",
+            description = "This is an example pasta recipe",
             icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298),
+            ingridients = listOf(" ", " "),
             onCardClick = { }
         )
 
@@ -110,9 +102,10 @@ fun ExplorePage(navController: NavController) {
 
         RecipePreviewCard(
             imageUrl = R.drawable.sample_card,
-            title = "Recipe Title 2",
-            description = "This is a description for Recipe 2.",
+            title = "Tasty Pizza",
+            description = "This is an example pizza recipie",
             icons = listOf(R.drawable.noun_spicy_4047676, R.drawable.noun_vegan_3029210),
+            ingridients = listOf(" ", " "),
             onCardClick = { }
         )
     }

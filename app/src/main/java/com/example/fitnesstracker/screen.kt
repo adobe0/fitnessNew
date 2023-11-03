@@ -11,4 +11,5 @@ sealed class  screen(val route: String) {
     object newUser: screen(route ="NewUser_Page")
     object NUSecQ: screen(route ="NUSecQ_Page")
     object menue: screen(route = "switcher")
+    object addRecipie: screen(route = "Addrecipe")
 }

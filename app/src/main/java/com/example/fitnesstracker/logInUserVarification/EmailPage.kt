@@ -1,6 +1,5 @@
 package com.example.fitnesstracker.logInUserVarification
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -28,13 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.fitnesstracker.R
 import com.example.fitnesstracker.screen
 import com.example.fitnesstracker.ui.theme.FitnessTrackerTheme
 import com.google.firebase.database.DataSnapshot
@@ -57,21 +54,14 @@ fun EmailPage(navController: NavHostController,) {
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.LightGray)) {
-        Image(
-            painter = painterResource(id = R.drawable.airbus_logo_2001),
-            contentDescription = "App Logo",
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(0.dp)
-                .size(300.dp)
-        )
+
 
         Column(
             modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Email ID:",
+                text = "Username:",
                 fontSize = 14.sp,
                 modifier = Modifier
                     .align(Alignment.Start)
@@ -111,6 +101,7 @@ fun EmailPage(navController: NavHostController,) {
                 onValueChange = { UserPasswordIn = it },
                 placeholder = { Text("Enter Password") },
                 singleLine = true,
+                visualTransformation = PasswordVisualTransformation(), // Add this line to hide the password
                 colors = TextFieldDefaults.textFieldColors(
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent
@@ -121,6 +112,7 @@ fun EmailPage(navController: NavHostController,) {
                     .shadow(3.dp, RoundedCornerShape(10.dp))
                     .background(Color.White)
             )
+
             // Display the button's text
             Text(text = "Forgot Password", color = Color.Gray, modifier = Modifier.clickable{
                 navController.navigate(route = screen.forgotPass1.route)

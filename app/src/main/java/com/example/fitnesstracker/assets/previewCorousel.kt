@@ -31,7 +31,8 @@ fun RecipePreviewCard(
     imageUrl: Int, // Drawable resource ID for the recipe image
     title: String,
     description: String,
-    icons: List<Int>, // List of drawable resource IDs for the icons
+    icons: List<Int>,
+    ingridients: List<String>,// List of drawable resource IDs for the icons
     onCardClick: () -> Unit // Lambda function to handle card click events
 ) {
     Card(
@@ -149,7 +150,8 @@ fun RecipeCardSample() {
             imageUrl = R.drawable.sample_card, // Hypothetical drawable ID for a recipe image
             title = "Delicious Pasta",
             description = "Delve into the rich and creamy flavors of this delightful pasta dish. Prepared with fresh basil, oregano, and a sprinkle of love, our recipe brings forth the authentic taste of Italian cuisine. The sun-dried tomatoes and parmesan shavings not only enhance the taste but also present an aesthetic appeal. Paired best with a glass of white wine.",
-            icons = listOf(R.drawable.noun_vegan_3029210,R.drawable.noun_stopwatch_5062298), // Hypothetical drawable IDs for icons
+            icons = listOf(R.drawable.noun_vegan_3029210,R.drawable.noun_stopwatch_5062298),
+            ingridients = listOf("hi"),// Hypothetical drawable IDs for icons
             onCardClick = {
                 // Handle the card click event
                 // E.g., navigate to the detailed recipe page
@@ -161,6 +163,7 @@ fun RecipeCardSample() {
             title = "Grilled Chicken Salad",
             description = "Savor the light, tangy flavors of this refreshing salad. Tender pieces of grilled chicken rest atop a bed of crispy lettuce, juicy cherry tomatoes, and crunchy croutons. The homemade Caesar dressing drizzled generously completes this culinary delight. It's a healthful choice that doesn't compromise on taste. Perfect for a summer afternoon.",
             icons = listOf(R.drawable.noun_vegan_3029210), // Hypothetical drawable IDs for icons
+            ingridients = listOf("hi"),
             onCardClick = {
                 // Handle the card click event
                 println("Recipe card clicked!")
@@ -171,7 +174,8 @@ fun RecipeCardSample() {
             title = "Chocolate Lava Cake",
             description = "Indulge in the decadent richness of molten chocolate encased in a soft cakey crust. This dessert promises a melt-in-the-mouth experience with every bite. The warm, flowing center is a treat for the senses, making it a favorite for all chocolate lovers. Top it off with a scoop of vanilla ice cream for an irresistible combination.",
             icons = listOf(R.drawable.noun_stopwatch_5062298), // Hypothetical drawable IDs for icons
-            onCardClick = {
+            ingridients = listOf("hi"),
+              onCardClick = {
                 // Handle the card click event
                 println("Recipe card clicked!")
             }
