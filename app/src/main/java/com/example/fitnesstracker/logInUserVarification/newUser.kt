@@ -48,8 +48,11 @@ fun SignUpPage() {
     var userEmailIn by remember { mutableStateOf("") }
     var userPasswordIn by remember { mutableStateOf("") }
     var userConfirmPasswordIn by remember { mutableStateOf("") }
+    var securityQuestionIn by remember { mutableStateOf("") }
+    var securityAnswerIn by remember { mutableStateOf("") }
     var buttonText by remember { mutableStateOf("") }
     val UserEnter = databaseRef.child("users")
+
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.LightGray)) {
@@ -81,6 +84,8 @@ fun SignUpPage() {
             )
 
             Spacer(modifier = Modifier.height(30.dp)) // Spacing between the quote and the fields
+
+            // Username field
             Text(
                 text = "Username:",
                 fontSize = 14.sp,
@@ -104,6 +109,7 @@ fun SignUpPage() {
                     .background(Color.White)
             )
 
+            // Email field
             Text(
                 text = "Email ID:",
                 fontSize = 14.sp,
@@ -127,6 +133,7 @@ fun SignUpPage() {
                     .background(Color.White)
             )
 
+            // Password field
             Text(
                 text = "Password:",
                 fontSize = 14.sp,
@@ -139,8 +146,8 @@ fun SignUpPage() {
                 onValueChange = { userPasswordIn = it },
                 placeholder = { Text("Enter Password") },
                 singleLine = true,
-                visualTransformation = PasswordVisualTransformation(), // This masks the password as dots
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), // This will show a password-style keyboard
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 colors = TextFieldDefaults.textFieldColors(
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent
@@ -152,6 +159,7 @@ fun SignUpPage() {
                     .background(Color.White)
             )
 
+            // Confirm password field
             Text(
                 text = "Confirm Password:",
                 fontSize = 14.sp,
@@ -165,7 +173,55 @@ fun SignUpPage() {
                 placeholder = { Text("Re-enter Password") },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), 
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                colors = TextFieldDefaults.textFieldColors(
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier
+                    .width(250.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .shadow(3.dp, RoundedCornerShape(10.dp))
+                    .background(Color.White)
+            )
+
+            // Security question field
+            Text(
+                text = "Security Question:",
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 2.dp)
+            )
+            TextField(
+                value = securityQuestionIn,
+                onValueChange = { securityQuestionIn = it },
+                placeholder = { Text("Enter Security Question") },
+                singleLine = true,
+                colors = TextFieldDefaults.textFieldColors(
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier
+                    .width(250.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .shadow(3.dp, RoundedCornerShape(10.dp))
+                    .background(Color.White)
+            )
+
+            // Security answer field
+            Text(
+                text = "Security Answer:",
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 2.dp)
+            )
+            TextField(
+                value = securityAnswerIn,
+                onValueChange = { securityAnswerIn = it },
+                placeholder = { Text("Enter Security Answer") },
+                singleLine = true,
                 colors = TextFieldDefaults.textFieldColors(
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent
@@ -181,18 +237,20 @@ fun SignUpPage() {
 
             Spacer(modifier = Modifier.height(70.dp))
 
+            // Sign-up button
             Button(
                 onClick = {
                     if (userPasswordIn == userConfirmPasswordIn) {
                         val secPassword = BCrypt.hashpw(userPasswordIn, BCrypt.gensalt())
-                        // Saving data to Firebase
-
+                        // Saving data to Firebase with security question and answer
                         val userDetail = hashMapOf(
                             "email" to userEmailIn,
-                            "password" to secPassword
+                            "password" to secPassword,
+                            "securityQuestion" to securityQuestionIn,
+                            "securityAnswer" to securityAnswerIn
                         )
 
-                        val database = FirebaseDatabase.getInstance()
+                        FirebaseDatabase.getInstance()
                         val userReference = UserEnter.child(userNameIn)
 
                         userReference.setValue(userDetail)
@@ -213,7 +271,6 @@ fun SignUpPage() {
         }
     }
 }
-
 
 @Preview(showSystemUi = true)
 @Composable

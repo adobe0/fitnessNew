@@ -31,11 +31,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordReset() {
+fun PasswordReset(navController: NavHostController) {
     // Mutable states to hold the user's new password and confirmed password inputs
     var newPassword by remember { mutableStateOf("") }
     var confirmNewPassword by remember { mutableStateOf("") }
@@ -54,12 +56,13 @@ fun PasswordReset() {
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
-                    .padding(top = 50.dp,start = 50.dp)
+                    .padding(top = 50.dp, start = 50.dp)
                     .align(Alignment.CenterHorizontally)
             )
             Text(
                 text = "Please enter your new password!",
-                modifier = Modifier.padding(top = 10.dp, start = 30.dp)
+                modifier = Modifier
+                    .padding(top = 10.dp, start = 30.dp)
                     .align(Alignment.CenterHorizontally)
             )
         }
@@ -127,10 +130,10 @@ fun PasswordReset() {
             Button(
                 onClick = {
                     // Check if new password and confirmed password match
-                    if (newPassword == confirmNewPassword && newPassword.isNotEmpty()) {
-                        feedbackMessage = "Password reset successful!"
+                    feedbackMessage = if (newPassword == confirmNewPassword && newPassword.isNotEmpty()) {
+                        "Password reset successful!"
                     } else {
-                        feedbackMessage = "Passwords do not match or are empty."
+                        "Passwords do not match or are empty."
                     }
                 },
                 colors = ButtonDefaults.buttonColors(Color(192, 219, 36))
@@ -146,5 +149,5 @@ fun PasswordReset() {
 @Preview(showSystemUi = true)
 @Composable
 fun PasRes(){
-    PasswordReset()
+    PasswordReset(rememberNavController())
 }

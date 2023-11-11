@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.fitnesstracker.MainPages.ExplorePage
 import com.example.fitnesstracker.MainPages.LandPage
 import com.example.fitnesstracker.MainPages.MyFoodPage
@@ -42,16 +43,13 @@ fun SetupNavGraph(navController: NavHostController){
         }
         composable(
             route = screen.forgotPass1.route){
-            ForgotPasswordSecurity()
+            ForgotPasswordSecurity(rememberNavController())
         }
         composable(
             route = screen.forgotpass2.route){
-            PasswordReset()
+            PasswordReset(rememberNavController())
         }
-        composable(
-            route = screen.forgotPass1.route){
-            ForgotPasswordSecurity()
-        }
+
         composable(
             route = screen.newUser.route){
             SignUpPage()
