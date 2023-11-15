@@ -5,20 +5,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.fitnesstracker.R
@@ -38,8 +32,8 @@ data class Recipe(
 @Composable
 fun LandPage(navController: NavController) {
     val recipes = remember { mutableStateOf<List<Recipe>>(emptyList()) }
+    var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
 
-    // Fetch recipes from Firebase on launch
     LaunchedEffect(Unit) {
         val database = Firebase.database.reference
         database.child("recipe").get().addOnSuccessListener { dataSnapshot ->
@@ -52,7 +46,7 @@ fun LandPage(navController: NavController) {
                     Recipe(imageUrl, name, description, icons)
                 } else null
             }
-            recipes.value = fetchedRecipes.shuffled().take(5) // Randomly select 5 recipes
+            recipes.value = fetchedRecipes.shuffled().take(5)
         }
     }
 
@@ -64,7 +58,7 @@ fun LandPage(navController: NavController) {
                 Icon(imageVector = Icons.Default.Menu, contentDescription = null)
             }
             Spacer(modifier = Modifier.width(340.dp))
-            Icon(painter = painterResource(id = R.drawable.airbus_logo_2001), contentDescription ="null", modifier = Modifier.size(30.dp))
+            Icon(painter = painterResource(id = R.drawable.airbus_logo_2001), contentDescription = "null", modifier = Modifier.size(30.dp))
         }
         Divider()
         Spacer(modifier = Modifier.height(5.dp))
@@ -88,7 +82,9 @@ fun LandPage(navController: NavController) {
                     title = recipe.title,
                     description = recipe.description,
                     icons = recipe.icons,
-                    onCardClick = {},
+                    onCardClick = {
+                        selectedRecipe = recipe
+                    },
                     ingridients = listOf("h", "hello00")
                 )
             }
@@ -104,11 +100,34 @@ fun LandPage(navController: NavController) {
             ingridients = listOf("hi", "hello")
         )
     }
+
+    if (selectedRecipe != null) {
+        Dialog(
+            onDismissRequest = { selectedRecipe = null }
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxSize().fillMaxWidth(),
+                color = Color.White
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Recipe Details", style = MaterialTheme.typography.headlineLarge)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Title: ${selectedRecipe?.title}")
+                    Text("Description: ${selectedRecipe?.description}")
+                    // Add more details as needed
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { selectedRecipe = null }) {
+                        Text("Close")
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewLandPage() {
-    LandPage(navController = rememberNavController()) // mock NavController for preview
+    LandPage(navController = rememberNavController())
 }
 
