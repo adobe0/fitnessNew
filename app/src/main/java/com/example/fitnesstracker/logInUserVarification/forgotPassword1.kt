@@ -140,7 +140,6 @@ fun ForgotPasswordSecurity(navController: NavHostController) {
                         val storedAnswer = userDetail?.get("securityAnswer") as? String
                         if (securityAnswer == storedAnswer) {
                             navController.navigate(route = screen.forgotpass2.route)
-                            // Navigate to reset password page or take appropriate action
                         } else {
                             feedbackMessage = "Incorrect answer!"
                         }

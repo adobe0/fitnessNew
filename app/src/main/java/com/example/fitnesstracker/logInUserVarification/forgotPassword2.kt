@@ -48,7 +48,7 @@ fun PasswordReset(navController: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color.LightGray)
-    ) {
+    ) {  
         // Display the title at the top
         Column {
             Text(
