@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,19 +48,22 @@ fun AddRecipe(navController: NavController) {
     val (ingredient, setIngredient) = remember { mutableStateOf("") }
     var instructions by remember { mutableStateOf(listOf<String>()) }
     val (instruction, setInstruction) = remember { mutableStateOf("") }
-    val keyboardController: SoftwareKeyboardController? = LocalSoftwareKeyboardController.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     val database: DatabaseReference = FirebaseDatabase.getInstance().reference
 
     fun insertRecipe() {
-        val recipeId = database.child("recipe").push().key ?: return
+        if (recipeName.text.isBlank()) {
+            // Handle empty recipe name case, e.g., show an error message
+            return
+        }
         val recipe = mapOf(
             "name" to recipeName.text,
             "description" to description.text,
             "ingredients" to ingredients,
             "instructions" to instructions
         )
-        database.child("recipe").child(recipeId).setValue(recipe)
+        database.child("recipes").child(recipeName.text).setValue(recipe)
     }
 
     // Gradient brush for the button
@@ -159,8 +161,10 @@ fun AddRecipe(navController: NavController) {
             }
         }
         Button(
-            onClick = { insertRecipe()
-                      navController.navigate(screen.explore.route)},
+            onClick = {
+                insertRecipe()
+                navController.navigate(screen.explore.route)
+            },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .background(brush = gradientBrush, shape = RoundedCornerShape(50))

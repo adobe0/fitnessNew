@@ -1,39 +1,69 @@
 package com.example.fitnesstracker.MainPages
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.fitnesstracker.R
-import com.example.fitnesstracker.assets.PlanNugget
 import com.example.fitnesstracker.assets.RecipePreviewCard
+import com.example.fitnesstracker.assets.addPlanCard
 import com.example.fitnesstracker.screen
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyPlanPage(navController: NavController) {
+    var showDialog by remember { mutableStateOf(false) }
+    val recipes = remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+    val plannedMeals = remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+
+    // Function to fetch recipes from Firebase
+    fun fetchRecipes() {
+        val database = Firebase.database.reference
+        database.child("recipes").get().addOnSuccessListener { dataSnapshot ->
+            val fetchedRecipes = dataSnapshot.children.mapNotNull { snapshot ->
+                val name = snapshot.child("name").getValue(String::class.java)
+                val description = snapshot.child("description").getValue(String::class.java)
+                if (name != null && description != null) {
+                    Pair(name, description)
+                } else null
+            }
+            recipes.value = fetchedRecipes
+            fun fetchPlannedMeals() {
+                val database = Firebase.database.reference
+                database.child("planned").get().addOnSuccessListener { dataSnapshot ->
+                    val plannedNames = dataSnapshot.children.mapNotNull { it.getValue(String::class.java) }
+                    plannedMeals.value = recipes.value.filter { it.first in plannedNames }
+                }
+            }
+        }
+    }
+
+    // Function to fetch planned meals and match with recipes
+    fun fetchPlannedMeals() {
+        val database = Firebase.database.reference
+        database.child("planned").get().addOnSuccessListener { dataSnapshot ->
+            val plannedNames = dataSnapshot.children.mapNotNull { it.getValue(String::class.java) }
+            plannedMeals.value = recipes.value.filter { it.first in plannedNames }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -66,9 +96,11 @@ fun MyPlanPage(navController: NavController) {
                 .padding(vertical = 4.dp)
         )
 
-        // New Plan Button
         Button(
-            onClick = { /* Handle Button Click */ },
+            onClick = {
+                showDialog = true
+                fetchRecipes() // Fetch recipes when dialog is shown
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.LightGray, CircleShape)
@@ -80,41 +112,87 @@ fun MyPlanPage(navController: NavController) {
 
         Spacer(modifier = Modifier.size(30.dp))
 
-        // Next Meal Text
-        Text(
-            text = "Next meal:",
-            color = Color.DarkGray,
-            fontSize = 12.sp,
-            modifier = Modifier.align(Alignment.Start)
-        )
+        Text(text = "Ingredients required:")
 
-        RecipePreviewCard(
-            imageUrl = R.drawable.orange_fruits,
-            title = "food ex",
-            description = "food is very yum",
-            icons = listOf(R.drawable.noun_stopwatch_5062298),
-            ingridients = listOf(" ", " "),
-        ) { }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFF0F0F0))
+                .padding(8.dp)
+        ) {
+            LazyColumn {
+                items(5) { index ->
+                    Text(
+                        text = "Ingredient ${index + 1}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.size(30.dp))
 
-        // Plan Text
-        Text(
-            text = "Plan:",
-            color = Color.DarkGray,
-            fontSize = 14.sp,
-            modifier = Modifier.align(Alignment.Start)
-        )
+        if (plannedMeals.value.isNotEmpty()) {
+            Text(
+                text = "Next meal:",
+                color = Color.DarkGray,
+                fontSize = 12.sp,
+                modifier = Modifier.align(Alignment.Start)
+            )
 
-        PlanNugget(title = "food ex2", description = "good")
-        PlanNugget(title = "food ex3", description = "bad")
-
-        // Further components for the My Plan page will go here
+            LazyRow {
+                items(plannedMeals.value) { (name, description) ->
+                    RecipePreviewCard(
+                        imageUrl = R.drawable.orange_fruits, // Replace with actual image URL
+                        title = name,
+                        description = description,
+                        icons = listOf(R.drawable.noun_stopwatch_5062298), // Replace with actual icons
+                        ingredients = listOf("Ingredient 1", "Ingredient 2") // Replace with actual ingredients
+                    )
+                }
+            }
+        }
     }
-}
 
-@Preview(showSystemUi = true)
-@Composable
-fun showMyPlan() {
-    MyPlanPage(navController = rememberNavController())
+    if (showDialog) {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Column(
+                modifier = Modifier
+                    .background(Color.White)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Select Recipes",
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF008080),
+                    fontSize = 20.sp
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                var searchText by remember { mutableStateOf("") }
+                OutlinedTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    label = { Text("Search Recipes") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                val filteredRecipes = recipes.value.filter {
+                    it.first.contains(searchText, ignoreCase = true)
+                }
+
+                LazyColumn {
+                    items(filteredRecipes) { (name, description) ->
+                        addPlanCard(recipeName = name, recipeDescription = description)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            }
+        }
+    }
 }

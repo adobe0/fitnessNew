@@ -1,4 +1,5 @@
 package com.example.fitnesstracker.MainPages
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -17,12 +18,10 @@ import com.example.fitnesstracker.R
 import com.example.fitnesstracker.assets.RecipePreviewCard
 import com.example.fitnesstracker.screen
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExplorePage(navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
-    var searchInitiated by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -55,47 +54,28 @@ fun ExplorePage(navController: NavController) {
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
         )
+        Button(onClick = { navController.navigate(route = screen.addRecipie.route)}, modifier = Modifier.fillMaxWidth()) {
+            Text(text = "Add recipie")
 
-        var textFieldValue1 by remember { mutableStateOf("") }
-        var textFieldValue2 by remember { mutableStateOf("") }
+            
+        }
 
         TextField(
             value = searchQuery,
-            onValueChange = {
-                searchQuery = it
-                searchInitiated = it.isNotBlank() // Search is initiated when the query is not blank
-            },
+            onValueChange = { searchQuery = it },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
             placeholder = { Text("Search for recipes") }
         )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-        ) {
-            TextField(
-                value = textFieldValue2,
-                onValueChange = { textFieldValue2 = it },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 4.dp)
-            )
-
-            Button(onClick = { navController.navigate(screen.addRecipie.route) }) {
-                Text("Add Recipe")
-            }
-        }
-
         RecipePreviewCard(
             imageUrl = R.drawable.orange_fruits,
             title = "Tasty Pasta",
             description = "This is an example pasta recipe",
             icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298),
-            ingridients = listOf(" ", " "),
-            onCardClick = { }
+            ingredients = listOf("Pasta", "Tomato Sauce"), // Placeholder ingredients
+
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -103,16 +83,15 @@ fun ExplorePage(navController: NavController) {
         RecipePreviewCard(
             imageUrl = R.drawable.sample_card,
             title = "Tasty Pizza",
-            description = "This is an example pizza recipie",
+            description = "This is an example pizza recipe",
             icons = listOf(R.drawable.noun_spicy_4047676, R.drawable.noun_vegan_3029210),
-            ingridients = listOf(" ", " "),
-            onCardClick = { }
+            ingredients = listOf("Dough", "Cheese"), // Placeholder ingredients
         )
     }
 }
 
 @Preview(showSystemUi = true)
 @Composable
-fun show(){
+fun show() {
     ExplorePage(navController = rememberNavController())
 }
