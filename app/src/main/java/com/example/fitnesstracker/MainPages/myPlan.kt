@@ -27,30 +27,33 @@ import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
+// Rename the Recipe data class to MealRecipe
+data class MealRecipe(
+    val name: String,
+    val description: String,
+    val ingredients: List<String>
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyPlanPage(navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
-    val recipes = remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
-    val plannedMeals = remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
-    val IngReq = remember {mutableStateOf<List<String>>(emptyList())}
+    val recipes = remember { mutableStateOf<List<MealRecipe>>(emptyList()) }
+    val plannedMeals = remember { mutableStateOf<List<MealRecipe>>(emptyList()) }
+    val IngReq = remember { mutableStateOf<List<String>>(emptyList()) }
 
-
-
-    data class Recipe(
-        val name: String,
-        val description: String,
-        val ingredients: List<String>
-    )
-
+    // Function to fetch recipes from Firebase
+    fun fetchIngredientsForSelectedRecipes() {
+        IngReq.value = plannedMeals.value.flatMap { it.ingredients }.distinct()
+    }
     fun fetchPlannedMeals() {
         val database = Firebase.database.reference
         database.child("planned").get().addOnSuccessListener { dataSnapshot ->
             val plannedNames = dataSnapshot.children.mapNotNull { it.getValue(String::class.java) }
-            plannedMeals.value = recipes.value.filter { it.first in plannedNames }
+            plannedMeals.value = recipes.value.filter { it.name in plannedNames }
+            fetchIngredientsForSelectedRecipes()
         }
     }
-    // Function to fetch recipes from Firebase
     fun fetchRecipes() {
         val database = Firebase.database.reference
         database.child("recipes").get().addOnSuccessListener { dataSnapshot ->
@@ -59,36 +62,23 @@ fun MyPlanPage(navController: NavController) {
                 val description = snapshot.child("description").getValue(String::class.java)
                 val ingredients = snapshot.child("ingredients").getValue(object : GenericTypeIndicator<List<String>>() {})
 
-                if (name != null && description != null) {
-                    Pair(name, description)
+                if (name != null && description != null && ingredients != null) {
+                    MealRecipe(name, description, ingredients)
                 } else null
             }
             recipes.value = fetchedRecipes
             fetchPlannedMeals() // Fetch planned meals
         }
     }
-    fun fetchIngredientsForSelectedRecipes(allRecipes: List<Recipe>) {
-        // Reference to Firebase database
-        val database = Firebase.database.reference
 
-        // Fetching planned recipe names from Firebase
-        database.child("planned").get().addOnSuccessListener { dataSnapshot ->
-            val plannedRecipeNames = dataSnapshot.children.mapNotNull { it.getValue(String::class.java) }
 
-            // Filter recipes to get only those that are in the planned list
-            val selectedRecipes = allRecipes.filter { it.name in plannedRecipeNames }
 
-            // Extract ingredients from selected recipes and update IngReq
-            IngReq.value = selectedRecipes.flatMap { it.ingredients }.distinct()
-        }
-    }
-
-println(IngReq)
 
 
     LaunchedEffect(Unit) {
-        fetchRecipes() // Fetch recipes and planned meals when the composable is first launched
+        fetchRecipes()
     }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -145,16 +135,16 @@ println(IngReq)
                 .background(Color(0xFFF0F0F0))
                 .padding(8.dp)
         ) {
-            //LazyColumn {
-              //  items() { ingredient ->
-                //    Text(
-                  //      text = ingredient,
-                    //    modifier = Modifier
-                      //      .fillMaxWidth()
-                        //    .padding(8.dp)
-                    //)
-               // }
-           // }
+            LazyColumn {
+                items(IngReq.value) { ingredient ->
+                    Text(
+                        text = ingredient,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.size(30.dp))
@@ -168,13 +158,13 @@ println(IngReq)
             )
 
             LazyRow {
-                items(plannedMeals.value) { (name, description) ->
+                items(plannedMeals.value) { recipe ->
                     RecipePreviewCard(
                         imageUrl = R.drawable.orange_fruits, // Replace with actual image URL
-                        title = name,
-                        description = description,
+                        title = recipe.name,
+                        description = recipe.description,
                         icons = listOf(R.drawable.noun_stopwatch_5062298), // Replace with actual icons
-                        ingredients = listOf("Ingredient 1", "Ingredient 2") // Replace with actual ingredients
+                        ingredients = recipe.ingredients
                     )
                 }
             }
@@ -208,12 +198,12 @@ println(IngReq)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 val filteredRecipes = recipes.value.filter {
-                    it.first.contains(searchText, ignoreCase = true)
+                    it.name.contains(searchText, ignoreCase = true)
                 }
 
                 LazyColumn {
-                    items(filteredRecipes) { (name, description) ->
-                        addPlanCard(recipeName = name, recipeDescription = description)
+                    items(filteredRecipes) { recipe ->
+                        addPlanCard(recipeName = recipe.name, recipeDescription = recipe.description)
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
@@ -221,4 +211,3 @@ println(IngReq)
         }
     }
 }
-
