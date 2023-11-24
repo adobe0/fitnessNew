@@ -17,11 +17,42 @@ import androidx.navigation.compose.rememberNavController
 import com.example.fitnesstracker.R
 import com.example.fitnesstracker.assets.RecipePreviewCard
 import com.example.fitnesstracker.screen
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+
+data class Recipes(
+    val imageUrl: Int,
+    val title: String,
+    val description: String,
+    val icons: List<Int>,
+    val ingredients: List<String>,
+    val instructions: String
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExplorePage(navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
+    val recipes = remember { mutableStateOf<List<Recipes>>(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        val database = Firebase.database.reference
+        database.child("recipes").get().addOnSuccessListener { dataSnapshot ->
+            val fetchedRecipes = dataSnapshot.children.mapNotNull { snapshot ->
+                val description = snapshot.child("description").getValue(String::class.java)
+                val name = snapshot.child("name").getValue(String::class.java)
+                val imageUrl = R.drawable.sample_card // Placeholder image
+                val icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298) // Placeholder icons
+                val ingredients = listOf("Ingredient 1", "Ingredient 2") // Placeholder ingredients
+                val instructions = "Cooking instructions here." // Placeholder instructions
+
+                if (description != null && name != null) {
+                    Recipes(imageUrl, name, description, icons, ingredients, instructions)
+                } else null
+            }
+            recipes.value = fetchedRecipes
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -54,10 +85,9 @@ fun ExplorePage(navController: NavController) {
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
         )
-        Button(onClick = { navController.navigate(route = screen.addRecipie.route)}, modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Add recipie")
 
-            
+        Button(onClick = { navController.navigate(route = screen.addRecipie.route)}, modifier = Modifier.fillMaxWidth()) {
+            Text(text = "Add recipe")
         }
 
         TextField(
@@ -69,24 +99,20 @@ fun ExplorePage(navController: NavController) {
             placeholder = { Text("Search for recipes") }
         )
 
-        RecipePreviewCard(
-            imageUrl = R.drawable.orange_fruits,
-            title = "Tasty Pasta",
-            description = "This is an example pasta recipe",
-            icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298),
-            ingredients = listOf("Pasta", "Tomato Sauce"), // Placeholder ingredients
+        val filteredRecipes = recipes.value.filter {
+            it.title.contains(searchQuery, ignoreCase = true)
+        }
 
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        RecipePreviewCard(
-            imageUrl = R.drawable.sample_card,
-            title = "Tasty Pizza",
-            description = "This is an example pizza recipe",
-            icons = listOf(R.drawable.noun_spicy_4047676, R.drawable.noun_vegan_3029210),
-            ingredients = listOf("Dough", "Cheese"), // Placeholder ingredients
-        )
+        filteredRecipes.forEach { recipe ->
+            RecipePreviewCard(
+                imageUrl = recipe.imageUrl,
+                title = recipe.title,
+                description = recipe.description,
+                icons = recipe.icons,
+                ingredients = recipe.ingredients
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
 

@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -45,21 +47,26 @@ fun RecipePreviewCard(
     title: String,
     description: String,
     icons: List<Int>,
-    ingredients: List<String>
+    ingredients: List<String> // Keep this even if it's not used directly
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    var instructions by remember { mutableStateOf("Loading instructions...") }
+    var instructions by remember { mutableStateOf<List<String>>(emptyList()) }
+    var ingredientsFromDb by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    // Fetch instructions from Firebase when the dialog is shown
+    // Fetch instructions and ingredients from Firebase when the dialog is shown
     LaunchedEffect(showDialog) {
         if (showDialog) {
             val database = Firebase.database.reference
             database.child("recipes").child(title).child("instructions").get()
                 .addOnSuccessListener { dataSnapshot ->
-                    instructions = dataSnapshot.getValue(String::class.java) ?: "Instructions not found."
+                    instructions = dataSnapshot.children.mapNotNull { it.getValue(String::class.java) }
                 }
                 .addOnFailureListener {
-                    instructions = "Failed to load instructions."
+                    instructions = listOf("Failed to load instructions.")
+                }
+            database.child("recipes").child(title).child("ingredients").get()
+                .addOnSuccessListener { dataSnapshot ->
+                    ingredientsFromDb = dataSnapshot.children.mapNotNull { it.getValue(String::class.java) }
                 }
         }
     }
@@ -126,12 +133,43 @@ fun RecipePreviewCard(
                 modifier = Modifier.fillMaxSize().fillMaxWidth(),
                 color = Color.White
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Recipe Details", style = MaterialTheme.typography.headlineLarge)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Title: $title")
-                    Text("Description: $description")
-                    Text("Instructions: $instructions")
+                Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+                    Image(
+                        painter = painterResource(id = imageUrl),
+                        contentDescription = "Recipe Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxWidth().height(250.dp)
+                    )
+                    Text("Title: $title", style = MaterialTheme.typography.titleLarge)
+                    Text("Description: $description", style = MaterialTheme.typography.bodySmall)
+
+                    // Icons row
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        icons.forEach { iconRes ->
+                            Icon(
+                                painter = painterResource(id = iconRes),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp).padding(end = 8.dp)
+                            )
+                        }
+                    }
+
+                    // Ingredients section
+                    Text("Ingredients", style = MaterialTheme.typography.bodyLarge)
+                    ingredientsFromDb.forEach { ingredient ->
+                        Text("- $ingredient", style = MaterialTheme.typography.bodyMedium)
+                    }
+
+                    // Instructions section
+                    Text("Instructions", style = MaterialTheme.typography.headlineMedium)
+                    instructions.forEach { instruction ->
+                        Text(instruction, style = MaterialTheme.typography.bodyMedium)
+                    }
+
+                    // Close button
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         modifier = Modifier.align(Alignment.End),
@@ -156,3 +194,5 @@ fun RecipeCardSample() {
         ingredients = listOf("Pasta", "Tomato Sauce", "Basil", "Cheese")
     )
 }
+
+

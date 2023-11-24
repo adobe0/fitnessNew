@@ -23,6 +23,7 @@ import com.example.fitnesstracker.R
 import com.example.fitnesstracker.assets.RecipePreviewCard
 import com.example.fitnesstracker.assets.addPlanCard
 import com.example.fitnesstracker.screen
+import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
@@ -32,30 +33,16 @@ fun MyPlanPage(navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
     val recipes = remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
     val plannedMeals = remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+    val IngReq = remember {mutableStateOf<List<String>>(emptyList())}
 
-    // Function to fetch recipes from Firebase
-    fun fetchRecipes() {
-        val database = Firebase.database.reference
-        database.child("recipes").get().addOnSuccessListener { dataSnapshot ->
-            val fetchedRecipes = dataSnapshot.children.mapNotNull { snapshot ->
-                val name = snapshot.child("name").getValue(String::class.java)
-                val description = snapshot.child("description").getValue(String::class.java)
-                if (name != null && description != null) {
-                    Pair(name, description)
-                } else null
-            }
-            recipes.value = fetchedRecipes
-            fun fetchPlannedMeals() {
-                val database = Firebase.database.reference
-                database.child("planned").get().addOnSuccessListener { dataSnapshot ->
-                    val plannedNames = dataSnapshot.children.mapNotNull { it.getValue(String::class.java) }
-                    plannedMeals.value = recipes.value.filter { it.first in plannedNames }
-                }
-            }
-        }
-    }
 
-    // Function to fetch planned meals and match with recipes
+
+    data class Recipe(
+        val name: String,
+        val description: String,
+        val ingredients: List<String>
+    )
+
     fun fetchPlannedMeals() {
         val database = Firebase.database.reference
         database.child("planned").get().addOnSuccessListener { dataSnapshot ->
@@ -63,7 +50,45 @@ fun MyPlanPage(navController: NavController) {
             plannedMeals.value = recipes.value.filter { it.first in plannedNames }
         }
     }
+    // Function to fetch recipes from Firebase
+    fun fetchRecipes() {
+        val database = Firebase.database.reference
+        database.child("recipes").get().addOnSuccessListener { dataSnapshot ->
+            val fetchedRecipes = dataSnapshot.children.mapNotNull { snapshot ->
+                val name = snapshot.child("name").getValue(String::class.java)
+                val description = snapshot.child("description").getValue(String::class.java)
+                val ingredients = snapshot.child("ingredients").getValue(object : GenericTypeIndicator<List<String>>() {})
 
+                if (name != null && description != null) {
+                    Pair(name, description)
+                } else null
+            }
+            recipes.value = fetchedRecipes
+            fetchPlannedMeals() // Fetch planned meals
+        }
+    }
+    fun fetchIngredientsForSelectedRecipes(allRecipes: List<Recipe>) {
+        // Reference to Firebase database
+        val database = Firebase.database.reference
+
+        // Fetching planned recipe names from Firebase
+        database.child("planned").get().addOnSuccessListener { dataSnapshot ->
+            val plannedRecipeNames = dataSnapshot.children.mapNotNull { it.getValue(String::class.java) }
+
+            // Filter recipes to get only those that are in the planned list
+            val selectedRecipes = allRecipes.filter { it.name in plannedRecipeNames }
+
+            // Extract ingredients from selected recipes and update IngReq
+            IngReq.value = selectedRecipes.flatMap { it.ingredients }.distinct()
+        }
+    }
+
+println(IngReq)
+
+
+    LaunchedEffect(Unit) {
+        fetchRecipes() // Fetch recipes and planned meals when the composable is first launched
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -120,16 +145,16 @@ fun MyPlanPage(navController: NavController) {
                 .background(Color(0xFFF0F0F0))
                 .padding(8.dp)
         ) {
-            LazyColumn {
-                items(5) { index ->
-                    Text(
-                        text = "Ingredient ${index + 1}",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    )
-                }
-            }
+            //LazyColumn {
+              //  items() { ingredient ->
+                //    Text(
+                  //      text = ingredient,
+                    //    modifier = Modifier
+                      //      .fillMaxWidth()
+                        //    .padding(8.dp)
+                    //)
+               // }
+           // }
         }
 
         Spacer(modifier = Modifier.size(30.dp))
@@ -196,3 +221,4 @@ fun MyPlanPage(navController: NavController) {
         }
     }
 }
+

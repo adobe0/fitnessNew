@@ -1,7 +1,7 @@
 package com.example.fitnesstracker.MainPages
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -35,7 +35,7 @@ fun LandPage(navController: NavController) {
 
     LaunchedEffect(Unit) {
         val database = Firebase.database.reference
-        database.child("recipe").get().addOnSuccessListener { dataSnapshot ->
+        database.child("recipes").get().addOnSuccessListener { dataSnapshot ->
             val fetchedRecipes = dataSnapshot.children.mapNotNull { snapshot ->
                 val description = snapshot.child("description").getValue(String::class.java)
                 val name = snapshot.child("name").getValue(String::class.java)
@@ -76,15 +76,14 @@ fun LandPage(navController: NavController) {
 
         Text(text = "Recommended:", Modifier.padding(start = 5.dp))
 
-        LazyRow {
+        LazyColumn() {
             items(recipes.value) { recipe ->
                 RecipePreviewCard(
                     imageUrl = recipe.imageUrl,
                     title = recipe.title,
                     description = recipe.description,
                     icons = recipe.icons,
-                    ingredients = recipe.ingredients,
-
+                    ingredients = recipe.ingredients
                 )
             }
         }
@@ -93,7 +92,7 @@ fun LandPage(navController: NavController) {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showSystemUi = true)
 @Composable
 fun PreviewLandPage() {
     LandPage(navController = rememberNavController())
