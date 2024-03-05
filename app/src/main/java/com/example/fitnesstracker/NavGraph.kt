@@ -22,7 +22,7 @@ fun SetupNavGraph(navController: NavHostController){
     NavHost(navController = navController,
         startDestination = screen.login.route
     ){
-        composable(
+        composable(// providing the file routing for each used page
             route = screen.landingPage.route){
             LandPage(navController = navController)
         }
@@ -43,7 +43,7 @@ fun SetupNavGraph(navController: NavHostController){
         }
         composable(
             route = screen.forgotPass1.route){
-            ForgotPasswordSecurity(rememberNavController())
+            ForgotPasswordSecurity(rememberNavController())// inserting nav controller in each page
         }
         composable(
             route = screen.forgotpass2.route){
