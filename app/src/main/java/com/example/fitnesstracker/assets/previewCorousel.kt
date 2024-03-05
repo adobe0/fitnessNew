@@ -56,13 +56,13 @@ fun RecipePreviewCard(
     // Fetch instructions and ingredients from Firebase when the dialog is shown
     LaunchedEffect(showDialog) {
         if (showDialog) {
-            val database = Firebase.database.reference
+            val database = Firebase.database.reference//access all firebase data
             database.child("recipes").child(title).child("instructions").get()
-                .addOnSuccessListener { dataSnapshot ->
+                .addOnSuccessListener { dataSnapshot -> //ensuring complete data transfer
                     instructions = dataSnapshot.children.mapNotNull { it.getValue(String::class.java) }
                 }
                 .addOnFailureListener {
-                    instructions = listOf("Failed to load instructions.")
+                    instructions = listOf("Failed to load instructions.")//error message 
                 }
             database.child("recipes").child(title).child("ingredients").get()
                 .addOnSuccessListener { dataSnapshot ->
@@ -71,7 +71,7 @@ fun RecipePreviewCard(
         }
     }
 
-    Card(
+    Card( //visula design of card
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp)
@@ -127,7 +127,7 @@ fun RecipePreviewCard(
         }
     }
 
-    if (showDialog) {
+    if (showDialog) {// display detailed recipie screen when clicked
         Dialog(onDismissRequest = { showDialog = false }) {
             Surface(
                 modifier = Modifier.fillMaxSize().fillMaxWidth(),
@@ -184,7 +184,7 @@ fun RecipePreviewCard(
 }
 
 @Preview(showSystemUi = false)
-@Composable
+@Composable//coding preview not exicuted
 fun RecipeCardSample() {
     RecipePreviewCard(
         imageUrl = R.drawable.sample_card,
