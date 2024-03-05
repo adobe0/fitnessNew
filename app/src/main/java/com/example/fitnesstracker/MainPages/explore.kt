@@ -36,15 +36,15 @@ fun ExplorePage(navController: NavController) {
     val recipes = remember { mutableStateOf<List<Recipes>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        val database = Firebase.database.reference
+        val database = Firebase.database.reference // establishing database adress
         database.child("recipes").get().addOnSuccessListener { dataSnapshot ->
             val fetchedRecipes = dataSnapshot.children.mapNotNull { snapshot ->
                 val description = snapshot.child("description").getValue(String::class.java)
                 val name = snapshot.child("name").getValue(String::class.java)
                 val imageUrl = R.drawable.sample_card // Placeholder image
-                val icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298) // Placeholder icons
-                val ingredients = listOf("Ingredient 1", "Ingredient 2") // Placeholder ingredients
-                val instructions = "Cooking instructions here." // Placeholder instructions
+                val icons = listOf(R.drawable.noun_vegan_3029210, R.drawable.noun_stopwatch_5062298) 
+                val ingredients = listOf("Ingredient 1", "Ingredient 2")
+                val instructions = "Cooking instructions here." 
 
                 if (description != null && name != null) {
                     Recipes(imageUrl, name, description, icons, ingredients, instructions)
@@ -90,7 +90,7 @@ fun ExplorePage(navController: NavController) {
             Text(text = "Add recipe")
         }
 
-        TextField(
+        TextField(//Search box
             value = searchQuery,
             onValueChange = { searchQuery = it },
             modifier = Modifier
@@ -99,7 +99,7 @@ fun ExplorePage(navController: NavController) {
             placeholder = { Text("Search for recipes") }
         )
 
-        val filteredRecipes = recipes.value.filter {
+        val filteredRecipes = recipes.value.filter {// recipie filter based on search
             it.title.contains(searchQuery, ignoreCase = true)
         }
 
@@ -110,14 +110,14 @@ fun ExplorePage(navController: NavController) {
                 description = recipe.description,
                 icons = recipe.icons,
                 ingredients = recipe.ingredients
-            )
+            )//clickable card for each recipie
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
 
 @Preview(showSystemUi = true)
-@Composable
+@Composable//screen preview while coding, not run when file is exicuted
 fun show() {
     ExplorePage(navController = rememberNavController())
 }
